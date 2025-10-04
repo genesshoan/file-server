@@ -2,6 +2,7 @@ package dev.shoangenes.utils;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class ServerProperties {
     private static final String DEFAULT_PORT = "8080";
@@ -14,6 +15,8 @@ public class ServerProperties {
     private static final String DEFAULT_LOG_FILE = "./logs/server.log";
     private static final String DEFAULT_LOG_CONSOLE = "true";
     private static final String PROPERTIES_FILE = "config.properties";
+
+    private final static Logger logger = LoggerUtil.getLogger(ServerProperties.class);
 
     /* Singleton instance */
     private static ServerProperties instance = null;
@@ -46,7 +49,7 @@ public class ServerProperties {
                 properties.load(input);
             }
         } catch (Exception e) {
-            Logger.getInstance().warn("Could not load properties file, using default values.");
+            logger.warning("Could not load properties file, using default values.");
         }
     }
 
@@ -54,8 +57,8 @@ public class ServerProperties {
      * Get the server port
      * @return the server port as a string
      */
-    public String getPort() {
-        return properties.getProperty("server.port", DEFAULT_PORT);
+    public int getPort() {
+        return Integer.parseInt(properties.getProperty("server.port", DEFAULT_PORT));
     }
 
     /**
@@ -78,16 +81,16 @@ public class ServerProperties {
      * Get the maximum file size allowed for uploads
      * @return the maximum file size as a string
      */
-    public String getMaxFileSize() {
-        return properties.getProperty("server.maxFileSize", DEFAULT_MAX_FILE_SIZE);
+    public int getMaxFileSize() {
+        return Integer.parseInt(properties.getProperty("server.maxFileSize", DEFAULT_MAX_FILE_SIZE));
     }
 
     /**
      * Get the maximum number of concurrent connections
      * @return the maximum number of connections as a string
      */
-    public String getMaxConnections() {
-        return properties.getProperty("server.maxConnections", DEFAULT_MAX_CONNECTIONS);
+    public int getMaxConnections() {
+        return Integer.parseInt(properties.getProperty("server.maxConnections", DEFAULT_MAX_CONNECTIONS));
     }
 
     /**
@@ -120,5 +123,9 @@ public class ServerProperties {
      */
     public String isLogConsoleEnabled() {
         return properties.getProperty("logging.console", DEFAULT_LOG_CONSOLE);
+    }
+
+    public String getMappingFilePath() {
+        return properties.getProperty("server.mapping.file", "./file_mappings.json");
     }
 }
