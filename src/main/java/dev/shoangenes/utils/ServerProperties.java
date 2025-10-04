@@ -5,6 +5,8 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 public class ServerProperties {
+    // --- Default property values ---
+
     private static final String DEFAULT_PORT = "8080";
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_STORAGE_DIR = "./storage/";
@@ -16,12 +18,18 @@ public class ServerProperties {
     private static final String DEFAULT_LOG_CONSOLE = "true";
     private static final String PROPERTIES_FILE = "config.properties";
 
+    // --- Logger ---
+
     private final static Logger logger = LoggerUtil.getLogger(ServerProperties.class);
+
+    // --- Instance variables ---
 
     /* Singleton instance */
     private static ServerProperties instance = null;
     /* Properties object to hold the configurations */
     private Properties properties = new Properties();
+
+    // --- Constructors ---
 
     /**
      * Private constructor to prevent instantiation
@@ -29,6 +37,8 @@ public class ServerProperties {
     private ServerProperties() {
         loadProperties();
     }
+
+    // --- Public methods ---
 
     /**
      * Singleton getInstance method
@@ -38,19 +48,6 @@ public class ServerProperties {
             instance = new ServerProperties();
         }
         return instance;
-    }
-
-    /**
-     * Load properties from the config file
-     */
-    private void loadProperties() {
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
-            if (input != null) {
-                properties.load(input);
-            }
-        } catch (Exception e) {
-            logger.warning("Could not load properties file, using default values.");
-        }
     }
 
     /**
@@ -125,7 +122,26 @@ public class ServerProperties {
         return properties.getProperty("logging.console", DEFAULT_LOG_CONSOLE);
     }
 
+    /**
+     * Get the mapping file path
+     * @return the mapping file path as a string
+     */
     public String getMappingFilePath() {
         return properties.getProperty("server.mapping.file", "./file_mappings.json");
+    }
+
+    // --- Private methods ---
+
+    /**
+     * Load properties from the config file
+     */
+    private void loadProperties() {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (Exception e) {
+            logger.warning("Could not load properties file, using default values.");
+        }
     }
 }

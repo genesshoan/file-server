@@ -6,12 +6,16 @@ import java.io.IOException;
 import java.util.zip.CRC32;
 
 public class HttpResponse {
+    // --- Constants and Fields ---
+
     private static final int MAGIC_NUMBER = 0x474F4B55;
     private HttpResults status;
     private int id;
     private byte[] binaryContent;
     private boolean hasBinaryContent;
     private long crc32;
+
+    // --- Constructors and Factory Methods ---
 
     /**
      * Constructor for HttpResponse
@@ -55,8 +59,6 @@ public class HttpResponse {
         return response;
     }
 
-    /** Static factory methods for error responses */
-
     /**
      * Creates a bad request response
      * @return HttpResponse with status BAD_REQUEST
@@ -81,19 +83,7 @@ public class HttpResponse {
         return new HttpResponse(HttpResults.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Builds the text response to be sent over the network
-     * @return the text representation of the response
-     */
-    public String buildTextResponse() {
-        String result = status.getCode() + "";
-        if (id != -1) {
-            result += " " + id;
-        }
-        return result;
-    }
-
-    /** Getters */
+    // --- Getters ---
 
     /**
      * Gets the binary content of the response
@@ -127,16 +117,7 @@ public class HttpResponse {
         return hasBinaryContent;
     }
 
-    /**
-     * Computes the CRC32 checksum of the binary content
-     */
-    private void computeCrc32() {
-        if (hasBinaryContent) {
-            CRC32 crc32 = new CRC32();
-            crc32.update(binaryContent);
-            this.crc32 = crc32.getValue();
-        }
-    }
+    // --- Serialization Method ---
 
     /**
      * Writes the response to a DataOutputStream
@@ -155,7 +136,10 @@ public class HttpResponse {
             output.write(binaryContent);
             output.writeLong(crc32);
         }
+        output.flush();
     }
+
+    // --- Deserialization Method ---
 
     /**
      * Reads a response from a DataInputStream
@@ -189,6 +173,8 @@ public class HttpResponse {
         return response;
     }
 
+    // --- CRC32 Methods ---
+
     /**
      * Verifies the CRC32 checksum of the binary content
      * @return true if the checksum matches, false otherwise
@@ -198,5 +184,16 @@ public class HttpResponse {
         CRC32 crc = new CRC32();
         crc.update(binaryContent);
         return crc.getValue() == this.crc32;
+    }
+
+    /**
+     * Computes the CRC32 checksum of the binary content
+     */
+    private void computeCrc32() {
+        if (hasBinaryContent) {
+            CRC32 crc32 = new CRC32();
+            crc32.update(binaryContent);
+            this.crc32 = crc32.getValue();
+        }
     }
 }

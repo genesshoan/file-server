@@ -1,6 +1,8 @@
 package dev.shoangenes.utils;
 
 public enum HttpResults {
+    // --- Enum Values ---
+
     SUCCESS(200, "OK"),
     BAD_REQUEST(400, "Bad Request"),
     FORBIDDEN(403, "Forbidden"),
@@ -8,14 +10,19 @@ public enum HttpResults {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     UNKNOWN(520, "Unknown Error");
 
+    // --- Fields ---
+
     private final int code;
     private final String message;
 
-    // Constructor
+    // --- Constructor ---
+
     HttpResults(int code, String message) {
         this.code = code;
         this.message = message;
     }
+
+    // --- Getters ---
 
     /**
      * Get the numerical HTTP status code.

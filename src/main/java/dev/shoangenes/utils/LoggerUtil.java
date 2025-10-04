@@ -3,6 +3,7 @@ package dev.shoangenes.utils;
 import java.util.logging.*;
 
 public class LoggerUtil {
+    // --- Logger Configuration ---
 
     private static FileHandler fileHandler;
     private static boolean consoleEnabled;

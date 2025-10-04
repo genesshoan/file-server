@@ -5,8 +5,11 @@ import java.util.logging.LogRecord;
 import java.util.logging.Level;
 
 public class LogFilter implements Filter {
+    // --- Fields ---
 
     private final Level minLevel;
+
+    // --- Constructors ---
 
     /**
      * Constructs a LogFilter with the minimum log level from ServerProperties.
@@ -14,6 +17,8 @@ public class LogFilter implements Filter {
     public LogFilter() {
         this.minLevel = Level.parse(ServerProperties.getInstance().getLogLevel());
     }
+
+    // --- Methods ---
 
     /**
      * Checks if a LogRecord should be logged based on its level.
