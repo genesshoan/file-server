@@ -69,14 +69,14 @@ public class RequestHandler implements Runnable {
 
         switch (method) {
             case "PUT" -> {
-                String fileName = parts.length > 1 ? parts[1] : " ";
+                String fileName = parts.length > 1 ? parts[1] : "";
 
                 byte[] fileContent = readFileContent(input);
                 return handlePut(fileName, fileContent);
             }
             case "GET" -> {
                 if (parts.length < 3) {
-                    HttpResponse.serverError();
+                    return HttpResponse.serverError();
                 }
 
                 String accessType = parts[1];
@@ -140,7 +140,7 @@ public class RequestHandler implements Runnable {
 
         if (!success) {
             logger.warning("Could not delete file with ID: " + id);
-            return HttpResponse.forbidden();
+            return HttpResponse.notFound();
         }
 
         logger.info("File deleted with ID: " + id);
@@ -157,7 +157,7 @@ public class RequestHandler implements Runnable {
 
         if (!success) {
             logger.warning("Could not delete file with name: " + fileName);
-            return HttpResponse.forbidden();
+            return HttpResponse.notFound();
         }
 
         logger.info("File deleted with name: " + fileName);
@@ -254,7 +254,6 @@ public class RequestHandler implements Runnable {
                 output.flush();
                 logger.info("Sent binary response");
             } else {
-                output.writeUTF(response.getStatusCode());
                 output.writeUTF(response.buildTextResponse());
                 output.flush();
                 logger.info("Sent text response");
