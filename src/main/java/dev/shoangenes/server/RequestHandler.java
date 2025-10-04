@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
+import java.util.zip.CRC32;
 
 public class RequestHandler implements Runnable {
     private final Socket socket;
@@ -72,6 +73,11 @@ public class RequestHandler implements Runnable {
                 String fileName = parts.length > 1 ? parts[1] : "";
 
                 byte[] fileContent = readFileContent(input);
+
+                if (fileContent == null) {
+                    return HttpResponse.serverError();
+                }
+
                 return handlePut(fileName, fileContent);
             }
             case "GET" -> {
@@ -125,10 +131,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    /**
-     * Handler methods for different request types.
-     * Each method interacts with the FileManager and constructs an appropriate HttpResponse.
-     */
+    // --- Handler Methods ---
 
     /**
      * Handles DELETE requests by file ID.
@@ -235,7 +238,7 @@ public class RequestHandler implements Runnable {
             return content;
         } catch (IOException e) {
             logger.severe("Error reading file content: " + e.getMessage());
-            return new byte[0];
+            return null;
         }
     }
 
@@ -247,17 +250,7 @@ public class RequestHandler implements Runnable {
      */
     private void sendResponse(DataOutputStream output, HttpResponse response) {
         try {
-            if (response.hasBinaryContent()) {
-                output.writeUTF(response.getStatusCode());
-                output.writeInt(response.getBinaryContent().length);
-                output.write(response.getBinaryContent());
-                output.flush();
-                logger.info("Sent binary response");
-            } else {
-                output.writeUTF(response.buildTextResponse());
-                output.flush();
-                logger.info("Sent text response");
-            }
+            response.writeTo(output);
         } catch (IOException e) {
             logger.severe("Error sending response: " + e.getMessage());
         }
