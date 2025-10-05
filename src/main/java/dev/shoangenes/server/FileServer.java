@@ -10,12 +10,18 @@ import dev.shoangenes.utils.LoggerUtil;
 import dev.shoangenes.utils.ServerProperties;
 
 public class FileServer implements AutoCloseable{
+    // --- Instance Variables ---
+
     private FileManager fileManager;
     private final ExecutorService executor;
     private final ServerSocket serverSocket;
     private boolean running;
 
+    // --- Logger ---
+
     private static final Logger logger = LoggerUtil.getLogger(FileServer.class);
+
+    // --- Constructor ---
 
     /**
      * Private constructor to initialize the FileServer.
@@ -35,14 +41,7 @@ public class FileServer implements AutoCloseable{
         logger.info("File Server initialized on " + host + ":" + port);
     }
 
-    /**
-     * Starts the server to accept incoming connections.
-     * This method blocks and runs indefinitely until the server is closed.
-     */
-    private void startServer() {
-        logger.info("Server started!");
-        acceptConnections();
-    }
+    // --- Private Methods ---
 
     /**
      * Accepts incoming client connections and delegates them to the thread pool for handling.
@@ -59,6 +58,17 @@ public class FileServer implements AutoCloseable{
     }
 
     /**
+     * Starts the server to accept incoming connections.
+     * This method blocks and runs indefinitely until the server is closed.
+     */
+    private void startServer() {
+        logger.info("Server started!");
+        acceptConnections();
+    }
+
+    // --- Public Methods ---
+
+    /**
      * Main method to start the FileServer.
      * Ensures proper resource management and logs server status.
      */
@@ -72,6 +82,8 @@ public class FileServer implements AutoCloseable{
             logger.info("Server stopped");
         }
     }
+
+    // --- AutoCloseable Implementation ---
 
     /**
      * Closes the server, stops accepting new connections, and shuts down the thread pool.

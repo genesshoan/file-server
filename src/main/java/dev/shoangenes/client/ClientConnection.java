@@ -52,7 +52,7 @@ public class ClientConnection implements AutoCloseable {
      */
     public void sendPutRequest(String fileName, byte[] data) throws IOException {
         checkConnection();
-        HttpRequest.put(fileName, data);
+        HttpRequest.put(fileName, data).writeTo(output);
     }
 
     /**

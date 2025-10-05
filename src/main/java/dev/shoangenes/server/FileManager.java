@@ -20,14 +20,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 class FileManager {
+    // --- Singleton Instance ---
     private static volatile FileManager instance;
 
+    // --- Instance Variables ---
     private Map<Integer, String> idToFilename;
     private Map<String, Integer> filenameToId;
     private AtomicInteger nextId = new AtomicInteger(1);
 
+    // --- Constants ---
+
     private final static Path JSON_PATH = Paths.get(ServerProperties.getInstance().getStorageDir() + "file_mappings.json");
     private final static Logger logger = LoggerUtil.getLogger(FileManager.class);
+
+    // --- Private Constructor ---
 
     /**
      * Private constructor to prevent instantiation
@@ -35,8 +41,23 @@ class FileManager {
     private FileManager() {
         idToFilename = new ConcurrentHashMap<>();
         filenameToId = new ConcurrentHashMap<>();
+
+        try {
+            Path storageDir = Paths.get(ServerProperties.getInstance().getStorageDir());
+            Files.createDirectories(storageDir);
+
+            Path jsonDir = JSON_PATH.getParent();
+            if (jsonDir != null) {
+                Files.createDirectories(jsonDir);
+            }
+        } catch (IOException e) {
+            logger.severe("Failed to create storage directories: " + e.getMessage());
+        }
+
         loadIdMappings();
     }
+
+    // --- Private Helper Methods ---
 
     /**
      * Generates the next unique ID for a file.
@@ -212,6 +233,28 @@ class FileManager {
     }
 
     /**
+     * Sanitizes a filename by removing potentially dangerous characters.
+     * @param filename the original filename
+     * @return the sanitized filename
+     */
+    private String sanitizeFilename(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return filename;
+        }
+
+        // Remover caracteres peligrosos y paths
+        filename = filename.replaceAll("[/\\\\]", "_");
+        filename = filename.replaceAll("\\.\\.", "_");
+
+        // Remover espacios al inicio/final
+        filename = filename.trim();
+
+        return filename;
+    }
+
+    // --- Public Methods ---
+
+    /**
      * Singleton getInstance method
      * @return the singleton instance of FileManager
      */
@@ -236,6 +279,8 @@ class FileManager {
         if (filename == null || filename.isEmpty()) {
             filename = generateUniqueFilename("file.dat");
         }
+
+        filename = sanitizeFilename(filename);
 
         if (!isValidFilename(filename)) {
             logger.warning("Invalid file extension: " + filename);
@@ -311,7 +356,7 @@ class FileManager {
      * @return the content of the file as a byte array, or null if an error occurred
      */
     public synchronized byte[] getFileById(int id) {
-        if (fileExistsById(id)) {
+        if (!fileExistsById(id)) {
             return null;
         }
 

@@ -1,5 +1,7 @@
 package dev.shoangenes.server;
 
+import dev.shoangenes.utils.HttpMethod;
+import dev.shoangenes.utils.HttpRequest;
 import dev.shoangenes.utils.LoggerUtil;
 import dev.shoangenes.utils.HttpResponse;
 import java.io.DataInputStream;
@@ -7,12 +9,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
-import java.util.zip.CRC32;
 
 public class RequestHandler implements Runnable {
+    // --- Instance Variables ---
     private final Socket socket;
-    private static final Logger logger = LoggerUtil.getLogger(RequestHandler.class);
     private final FileManager fileManager = FileManager.getInstance();
+
+    // --- Logger ---
+
+    private static final Logger logger = LoggerUtil.getLogger(RequestHandler.class);
+
+    // --- Constructor ---
 
     public RequestHandler(Socket socket) {
         this.socket = socket;
@@ -31,7 +38,7 @@ public class RequestHandler implements Runnable {
              DataOutputStream output = new DataOutputStream(socket.getOutputStream())) {
             logger.info("Connection accepted from " + socket.getInetAddress() + ":" + socket.getPort());
 
-            String request = input.readUTF();
+            HttpRequest request = HttpRequest.readFrom(input);
             logger.info("Received request: " + request);
 
             HttpResponse response = processRequest(request, input);
@@ -59,20 +66,14 @@ public class RequestHandler implements Runnable {
      * @param input   The DataInputStream to read additional data if needed.
      * @return An HttpResponse object representing the result of the request.
      */
-    private HttpResponse processRequest(String request, DataInputStream input) {
-        String[] parts = request.trim().split("\\s+");
-
-        if (parts.length == 0) {
-            return HttpResponse.serverError();
-        }
-
-        String method = parts[0].toUpperCase();
+    private HttpResponse processRequest(HttpRequest request, DataInputStream input) {
+        HttpMethod method = request.getMethod();
 
         switch (method) {
-            case "PUT" -> {
-                String fileName = parts.length > 1 ? parts[1] : "";
+            case PUT -> {
+                String fileName = request.getFileName();
 
-                byte[] fileContent = readFileContent(input);
+                byte[] fileContent = request.getData();
 
                 if (fileContent == null) {
                     return HttpResponse.serverError();
@@ -80,49 +81,17 @@ public class RequestHandler implements Runnable {
 
                 return handlePut(fileName, fileContent);
             }
-            case "GET" -> {
-                if (parts.length < 3) {
-                    return HttpResponse.serverError();
-                }
-
-                String accessType = parts[1];
-
-                if (accessType.equals("BY_ID")) {
-                    int id;
-                    try {
-                        id = Integer.parseInt(parts[2]);
-                    } catch (NumberFormatException e) {
-                        return HttpResponse.serverError();
-                    }
-                    return handleGetById(id);
-                } else if (accessType.equals("BY_NAME")) {
-                    String fileName = parts[2];
-                    return handleGetByName(fileName);
-                } else {
-                    return HttpResponse.serverError();
-                }
+            case GET_BY_ID -> {
+                return handleGetById(request.getId());
             }
-            case "DELETE" -> {
-                if (parts.length < 3) {
-                    return HttpResponse.serverError();
-                }
-
-                String accessType = parts[1];
-
-                if (accessType.equals("BY_ID")) {
-                    int id;
-                    try {
-                        id = Integer.parseInt(parts[2]);
-                    } catch (NumberFormatException e) {
-                        return HttpResponse.serverError();
-                    }
-                    return handleDeleteById(id);
-                } else if (accessType.equals("BY_NAME")) {
-                    String fileName = parts[2];
-                    return handleDeleteByName(fileName);
-                } else {
-                    return HttpResponse.serverError();
-                }
+            case GET_BY_NAME -> {
+                return handleGetByName(request.getFileName());
+            }
+            case DELETE_BY_ID -> {
+                return handleDeleteById(request.getId());
+            }
+            case DELETE_BY_NAME -> {
+                return handleDeleteByName(request.getFileName());
             }
             default -> {
                 logger.info("Unsupported method: " + method);
@@ -222,24 +191,6 @@ public class RequestHandler implements Runnable {
 
         logger.info("File sent with name: " + fileName);
         return HttpResponse.successWithContent(content);
-    }
-
-    /**
-     * Reads file content from the DataInputStream.
-     * Expects the first 4 bytes to represent the length of the content.
-     * @param input The DataInputStream to read from.
-     * @return A byte array containing the file content.
-     */
-    private byte[] readFileContent(DataInputStream input) {
-        try {
-            int length = input.readInt();
-            byte[] content = new byte[length];
-            input.readFully(content, 0, length);
-            return content;
-        } catch (IOException e) {
-            logger.severe("Error reading file content: " + e.getMessage());
-            return null;
-        }
     }
 
     /**
