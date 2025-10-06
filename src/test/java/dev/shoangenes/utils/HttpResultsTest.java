@@ -3,7 +3,6 @@ package dev.shoangenes.utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpResultsTest {
     static HttpResults success;
@@ -55,6 +54,6 @@ public class HttpResultsTest {
     public void testFromStatusCodeInvalidCode() {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> HttpResults.fromCode(999))
-            .withMessage("No HttpResults constant with code 999");
+            .withMessage("No matching HttpResults for code: 999");
     }
 }
