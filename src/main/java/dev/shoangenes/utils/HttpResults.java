@@ -7,8 +7,7 @@ public enum HttpResults {
     BAD_REQUEST(400, "Bad Request"),
     FORBIDDEN(403, "Forbidden"),
     NOT_FOUND(404, "Not Found"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-    UNKNOWN(520, "Unknown Error");
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     // --- Fields ---
 
@@ -44,6 +43,6 @@ public enum HttpResults {
                 return r;
             }
         }
-        return UNKNOWN;
+        throw new IllegalArgumentException("No matching HttpResults for code: " + code);
     }
 }

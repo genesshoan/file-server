@@ -24,9 +24,9 @@ class FileManager {
     private static volatile FileManager instance;
 
     // --- Instance Variables ---
-    private Map<Integer, String> idToFilename;
-    private Map<String, Integer> filenameToId;
-    private AtomicInteger nextId = new AtomicInteger(1);
+    private final Map<Integer, String> idToFilename;
+    private final Map<String, Integer> filenameToId;
+    private final AtomicInteger nextId = new AtomicInteger(1);
 
     // --- Constants ---
 

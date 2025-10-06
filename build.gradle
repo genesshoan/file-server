@@ -10,9 +10,14 @@ repositories {
 }
 
 dependencies {
+    // AssertJ for fluent assertions
+    testImplementation 'org.assertj:assertj-core:3.26.0'
+
+    // JUnit BOM for consistent versioning
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
+    // Gson for JSON parsing
     implementation 'com.google.code.gson:gson:2.10.1'
 }
 
